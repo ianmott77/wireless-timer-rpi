@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>UI/Settings.qml</file>
+        <file>UI/ViewTime.qml</file>
+        <file>UI/SetFinishDistance.qml</file>
+        <file>UI/SettingsMenuFooter.qml</file>
+        <file>UI/Start.qml</file>
+        <file>UI/PullDown.qml</file>
+        <file>UI/SettingsListModel.qml</file>
+        <file>UI/SettingsMenu.qml</file>
+        <file>UI/AddDevice.qml</file>
+        <file>UI/Sync.qml</file>
+        <file>UI/ScreenLock.qml</file>
+    </qresource>
+</RCC>
