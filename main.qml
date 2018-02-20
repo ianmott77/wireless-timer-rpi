@@ -7,8 +7,8 @@ import "UI" as UI
 
 ApplicationWindow {
     id: mainWindow
-    width: 1024
-    height: 600
+    width: 480
+    height: 800
     visible: true
     property int type: Arduino.getType()
 

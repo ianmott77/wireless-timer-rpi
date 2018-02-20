@@ -25,7 +25,8 @@ SOURCES += main.cpp \
     distancethread.cpp \
     uicontroller.cpp \
     arduino.cpp \
-    device.cpp
+    device.cpp \
+    racer.cpp
 
 RESOURCES += qml.qrc
 
@@ -55,4 +56,5 @@ HEADERS += \
     distancethread.h \
     uicontroller.h \
     arduino.h \
-    device.h
+    device.h \
+    racer.h

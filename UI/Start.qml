@@ -28,6 +28,7 @@ Item {
             horizontalAlignment: Text.AlignHCenter
             selectionColor: "#7d8000"
             inputMethodHints: Qt.ImhDigitsOnly
+            text: "1"
         }
     }
     Rectangle {
@@ -49,6 +50,7 @@ Item {
             anchors.fill: parent
             onClicked: {
                 Controller.startRacer(bibNum.text);
+                bibNum.text++;
             }
         }
     }

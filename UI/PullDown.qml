@@ -35,6 +35,7 @@ Rectangle {
             y: pageMain.y + pageMain.height
             width: parent.width
             height: pullDownPage.footerHeight
+            color: "transparent"
             Loader {
                 anchors.fill: parent
                 source: pullDownPage.footer
