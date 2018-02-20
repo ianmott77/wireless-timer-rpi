@@ -10,8 +10,9 @@ class ConnectionFactory{
 		ConnectionFactory();
 		~ConnectionFactory();
 		Connection * newConnection(ConnectionType);
+        Connection * getLastConnection();
 	private:
-	
+        Connection * lastConnection;
 };
 
 #endif

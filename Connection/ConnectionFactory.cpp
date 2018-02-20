@@ -1,21 +1,20 @@
 #include "ConnectionFactory.h"
 
 ConnectionFactory::ConnectionFactory(){
-
+    this->lastConnection = 0;
 }
 
 ConnectionFactory::~ConnectionFactory(){
-
+    delete this->lastConnection;
 }
 
 Connection * ConnectionFactory::newConnection(ConnectionType type){
-	Connection * c;
-	if(type == SPI){
-		c = new Spi();
+    if(type == SPI){
+        this->lastConnection = new Spi();
 	}else if(type == I2C){
-		c =  new i2c();
+        this->lastConnection =  new i2c();
 	}else if(type == SERIAL){
-		c = new Serial();
+        this->lastConnection = new Serial();
 	}
-	return c;
+    return this->lastConnection;
 }

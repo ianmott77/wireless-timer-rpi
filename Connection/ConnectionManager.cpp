@@ -5,7 +5,7 @@ ConnectionManager::ConnectionManager(){
 }
 
 ConnectionManager::~ConnectionManager(){
-
+    delete this->factory;
 }
 
 void ConnectionManager::setCurrentConnection(Connection * c){

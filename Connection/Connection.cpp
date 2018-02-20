@@ -1,6 +1,8 @@
 #include "Connection.h"
 
-Connection::~Connection(){}
+Connection::~Connection(){
+    this->closeConnection();
+}
 
 void Connection::closeConnection(){
 	close(this->file);
