@@ -1,4 +1,3 @@
-
 #include "arduino.h"
 
 Arduino::Arduino(ConnectionManager * manager) : Device(this->getID(), this->getPosition())
@@ -6,6 +5,7 @@ Arduino::Arduino(ConnectionManager * manager) : Device(this->getID(), this->getP
     this->manager =manager;
     this->intervalSignal = false;
     this->dist = new DistanceThread(this->manager);
+    this->timeQueue = new QQueue<Racer*>();
     this->getInfo();
 }
 
@@ -146,12 +146,38 @@ bool Arduino::addDevice(int ID, int position, Device * device){
 }
 
 void Arduino::receiveIntervalSignal(){
-    SerialMonitor * mon = new SerialMonitor(this->manager);
-    std::thread serMon(&SerialMonitor::monitor, mon);
-    serMon.join();
-    if(!mon->wasCancelled()){
+    this->monitor = new SerialMonitor(this->manager);
+    std::thread *  serMon = this->monitor->start();
+    serMon->join();
+    if(!this->monitor->wasCancelled()){
+        delete this->monitor;
         this->intervalSignal = true;
     }
+}
+
+void Arduino::raceMode(){
+
+}
+
+QQueue<Racer*> * Arduino::getTimeQueue(){
+    return this->timeQueue;
+}
+
+Racer * Arduino::getRacerInfo(){
+       Packet * p = 0;
+       int bib = 0;
+       unsigned long int start = 0;
+        int curTime = 0;
+       p = this->manager->read();
+       memcpy(&bib, (int*) p->getData(), p->getSize());
+       p = this->manager->read();
+       memcpy(&start, (unsigned long*) p->getData(), p->getSize());
+       p = this->manager->read();
+       memcpy(&curTime, (int*) p->getData(), p->getSize());
+       Racer * r = new Racer(bib, start, curTime, new QElapsedTimer());
+       r->start();
+       this->timeQueue->enqueue(r);
+       return r;
 }
 
 SerialMonitor * Arduino::getMonitor(){

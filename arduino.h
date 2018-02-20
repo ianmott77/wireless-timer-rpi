@@ -3,9 +3,12 @@
 
 #include <QObject>
 #include <QQuickItem>
+#include <QQueue>
+
 #include "Connection/SerialMonitor.h"
 #include "distancethread.h"
 #include "device.h"
+#include "racer.h"
 
 class Arduino: public Device
 {
@@ -42,10 +45,15 @@ signals:
     void receiveIntervalSignal();
     bool getIntervalStatus();
     void setIntervalStatus(bool);
+    Racer *  getRacerInfo();
+    void raceMode();
+    QQueue<Racer*> * getTimeQueue();
+
 private:
     void monitorSerialLine();
     std::thread * monLine;
     std::thread * line;
+    QQueue<Racer*> * timeQueue = 0;
     SerialMonitor * monitor = 0;
     ConnectionManager * manager = 0;
     std::atomic<bool> intervalSignal;

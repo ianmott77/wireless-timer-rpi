@@ -49,6 +49,8 @@ public slots:
       int getCurrentTime();
       int getCurrentBib();
       void setCurrentBib(int);
+      void goRaceMode();
+      Racer * getLastRacer();
 private:
     int distance = -1;
     int bib = -1;
@@ -60,6 +62,7 @@ private:
     QQmlApplicationEngine * engine;
     QObject * qml = 0;
     QString loadingMsg;
+    std::atomic<bool> uiCounter;
 };
 
 #endif // UICONTROLLER_H

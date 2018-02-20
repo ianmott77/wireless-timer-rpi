@@ -101,58 +101,97 @@ void UIController::choiceDispatch(int choice){
      );
     }else if(choice == 4){
         emit this->raceMode();
-        std::thread * thr = new std::thread([this] {
-            Packet * p = 0;
-            while(this->arduino->getMonitor()->isRunning()); //wait
-            std::cout << "Run Started" << std::endl <<std::flush;
-            int bib = 0;
-            unsigned long int start = 0;
-            int curTime = 0;
-            p = this->manager->read();
-            memcpy(&bib, (int*) p->getData(), p->getSize());
-            this->setCurrentBib(bib);
-            p = this->manager->read();
-            memcpy(&start, (unsigned long*) p->getData(), p->getSize());
-            p = this->manager->read();
-            memcpy(&curTime, (int*) p->getData(), p->getSize());
-            std::cout << "Bib #: " << this->bib << std::endl  << "Start ms: " << start << std::endl << "Current Time: " << curTime << std::endl<< std::flush;
-            this->currentTime  = curTime;
-            std::thread thra(&Arduino::receiveIntervalSignal, this->arduino);
-            std::thread * th  = new std::thread([this]{
-                QElapsedTimer timer;
-                int add = this->currentTime;
-                timer.restart();
-                while(!this->arduino->getIntervalStatus()){
-                    this->currentTime =  timer.elapsed() + add;
-                }
-            });
-            QElapsedTimer timer;
-            timer.restart();
-            int last = timer.elapsed();
-            while(!this->arduino->getIntervalStatus()){
-                int now = timer.elapsed();
-                 if(now - last > 30){
-                    emit this->racerOnCourse(this->getCurrentTime());
-                     last = timer.elapsed();
-                 }
-            }
-            std::cout << std::endl << std::flush;
-            thra.join();
-            th->join();
-            int interval = 0;
-            p = this->manager->read();
-            memcpy(&interval, (int*) p->getData(), p->getSize());
-            std::cout << "Interval: " << interval << std::endl << std::flush;
-            this->currentTime = interval - start;
-            emit this->racerOnCourse(this->currentTime);
-            double t = this->currentTime /1000.0000;
-            std::cout << "Time ms: " << this->currentTime << std::endl << "Time: " << t << std::endl << std::flush;
-            this->arduino->setIntervalStatus(false);
-            emit this->free();
-        } );
+        this->goRaceMode();
     }
 }
 
+Racer * UIController::getLastRacer(){
+   return  this->arduino->getTimeQueue()->head();
+}
+
+void UIController::goRaceMode(){
+    std::thread * thr = new std::thread([this] {
+        Packet * p = 0;
+        uiCounter = false;
+        std::thread * th;
+
+        while(this->arduino->getMonitor()->isRunning()); //wait
+
+        std::cout << "Run Started" << std::endl <<std::flush;
+        Racer * r = this->arduino->getRacerInfo();
+        std::cout << "Bib #: " << r->getBib() << std::endl  << "Start ms: " << r->getStartTime()  << std::endl << "Current Time: " << r->getStartDelay() << std::endl<< std::flush;
+        std::thread * thra = new std::thread(&Arduino::receiveIntervalSignal, this->arduino);
+
+        //this is the ui timer
+        QElapsedTimer timer;
+        timer.start();
+        int last = timer.elapsed();
+        bool done = false;
+
+        while(!done){
+            int now = timer.elapsed();
+
+            //check if we have already started the thread to updat the current time
+            if(!uiCounter){
+               this->setCurrentBib(this->getLastRacer()->getBib());
+                uiCounter = true;
+                 th  = new std::thread([this]{
+                    while(uiCounter){
+                        this->currentTime =  this->getLastRacer()->getTime();
+                    }
+                 });
+            }
+
+            //we need to allow a small amount of time for the PC to update otherwise it glitches
+            if(now - last > 5){
+                 emit this->racerOnCourse(this->getCurrentTime());
+                last = timer.elapsed();
+            }
+
+            //check if we received a signal from the arduino either to add a new racer to the stack or that someone has crossed the finish
+            if(this->arduino->getIntervalStatus()){
+
+                while(this->arduino->getMonitor()->isRunning()); //wait
+
+                p = this->manager->read();
+                 int option = 0;
+                memcpy(&option, (int*) p->getData(), p->getSize());
+                std::cout << "option: " << option << std::endl << std::flush;
+
+                if(option == 1){ //somone crossed the finish line
+                    uiCounter = false;
+                    th->join();
+                   int interval = 0;
+                   int racerCount = 0;
+                    p = this->manager->read();
+                    memcpy(&interval, (int*) p->getData(), p->getSize());
+                    std::cout << "Interval: " << interval << std::endl << std::flush;
+                    p = this->manager->read();
+                    memcpy(&racerCount, (int*) p->getData(), p->getSize());
+                    Racer * finisher = this->arduino->getTimeQueue()->dequeue();
+                     this->currentTime = interval -  finisher->getStartTime();
+                    emit this->racerOnCourse(this->currentTime);
+                    double t = this->currentTime /1000.00;
+                    std::cout << "Bib #: " << finisher->getBib() << std::endl << "Start ms: " << finisher->getStartTime() << std::endl << "Time ms: " << this->currentTime << std::endl << "Time: " << t << std::endl << std::flush;
+                    std::cout << "Racer Count: " << racerCount << std::endl;
+                }else if(option == 4){ //a new racer is on the track
+                     std::cout << "Run Started" << std::endl <<std::flush;
+                     Racer * starter = this->arduino->getRacerInfo();
+                    std::cout << "Bib #: " << starter->getBib() << std::endl  << "Start ms: " << starter->getStartTime()  << std::endl << "Current Time: " << starter->getTime() << std::endl<< std::flush;
+                 }
+\
+                this->arduino->setIntervalStatus(false);
+
+                if(this->arduino->getTimeQueue()->size() > 0){
+                    thra = new std::thread(&Arduino::receiveIntervalSignal, this->arduino);
+                }else{
+                    done = true;
+                    emit this->free();
+                }
+            }
+       }
+    } );
+}
 int UIController::getCurrentBib(){
     return this->bib;
 }
