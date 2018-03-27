@@ -2,21 +2,22 @@ import QtQuick 2.0
 
 Item {
     id: finishDistanceWindow
-    property var distance
+    property var distance :  0
+    width: 238
+    height: 402
     Connections {
         target: Controller
         onDistanceChanged: {
-            finishDistanceWindow.distance = Controller.getDistance()
-            finishDistance.text = finishDistanceWindow.distance / 100.00
+            finishDistance.text = Arduino.getDistance()/ 100.00
         }
     }
 
     Item {
         id: startButtonWrapper
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 285
+        x: 30
+        y: 325
         visible: true
-        width: 150
+        width: 175
         height: 50
         Rectangle {
             id: startButton
@@ -27,13 +28,16 @@ Item {
                 onClicked: {
                     startButtonWrapper.visible = false
                     setDistanceWrapper.visible = true
+                    cancelWrapper.visible = true
                     Controller.startDistanceMeasurement()
                 }
             }
 
             Text {
                 text: qsTr("Start")
-                font.family: "Arial"
+                anchors.verticalCenterOffset: 1
+                anchors.horizontalCenterOffset: 0
+                font.family: "IBM Plex Sans"
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
                 renderType: Text.NativeRendering
@@ -45,31 +49,85 @@ Item {
 
     Text {
         id: finishDistance
-        y: 227
-        width: 150
-        height: 50
-        text: qsTr("00.00")
+        y: 145
+        width: 175
+        height: 80
+        text: distance
+        fontSizeMode: Text.Fit
+        renderType: Text.NativeRendering
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        anchors.horizontalCenterOffset: 0
         anchors.horizontalCenter: parent.horizontalCenter
-        font.pixelSize: 60
+        font.pixelSize: 70
+        font.family: "IBM Plex Sans"
+    }
+
+    Item {
+        id: cancelWrapper
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: 235
+        visible: false
+        width: 175
+        height: 50
+        anchors.horizontalCenterOffset: 0
+        Rectangle {
+            anchors.fill: parent
+            color: "red"
+            Text {
+                anchors.fill: parent
+                text: qsTr("Cancel")
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                anchors.verticalCenterOffset: 0
+                anchors.horizontalCenterOffset: 0
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+                renderType: Text.NativeRendering
+                font.pixelSize: 25
+                color: "#ffffff"
+                font.family: "IBM Plex Sans"
+            }
+
+            MouseArea {
+                id: cancel
+                anchors.fill: parent
+                onClicked: {
+                    setDistanceWrapper.visible = false
+                    startButtonWrapper.visible = true
+                    cancelWrapper.visible = false
+                    Controller.setFinishDistance(distance * 100)
+                    finishDistance.text = distance
+                }
+            }
+        }
     }
 
     Item {
         id: setDistanceWrapper
         anchors.horizontalCenter: parent.horizontalCenter
-        y: 350
+        y: 325
         visible: false
-        width: 150
+        width: 176
         height: 50
+        anchors.horizontalCenterOffset: 0
         Rectangle {
             anchors.fill: parent
-            color: "red"
+            color: "green"
             Text {
+                width: 176
+                height: 50
                 text: qsTr("Set")
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                anchors.verticalCenterOffset: 0
+                anchors.horizontalCenterOffset: 0
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
                 renderType: Text.NativeRendering
                 font.pixelSize: 25
-                color: "black"
+                color: "#ffffff"
+                font.family: "IBM Plex Sans"
             }
 
             MouseArea {
@@ -78,7 +136,9 @@ Item {
                 onClicked: {
                     setDistanceWrapper.visible = false
                     startButtonWrapper.visible = true
-                    Controller.setFinishDistance(finishDistanceWindow.distance)
+                    cancelWrapper.visible = false
+                    distance = finishDistance.text
+                    Controller.setFinishDistance(finishDistanceWindow.distance * 100)
                 }
             }
         }
@@ -87,11 +147,17 @@ Item {
     Text {
         id: setDistanceTitle
         x: 271
-        y: 120
-        text: qsTr("Set Finish Distance")
+        y: 37
+        width: 224
+        height: 55
+        text: qsTr("Set Finish")
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        font.underline: true
         anchors.horizontalCenter: parent.horizontalCenter
-        font.family: "Arial"
+        fontSizeMode: Text.Fit
+        font.family: "IBM Plex Sans"
         renderType: Text.NativeRendering
-        font.pixelSize: 62
+        font.pixelSize: 48
     }
 }

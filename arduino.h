@@ -21,6 +21,7 @@ public:
 signals:
     void signalChoice(int);
     void readyToUpdate();
+    void error(int);
  public slots:
     int getType();
     void setType(int);
@@ -48,6 +49,8 @@ signals:
     Racer *  getRacerInfo();
     void raceMode();
     QQueue<Racer*> * getTimeQueue();
+    bool isMonitorRunning();
+    void dnfRacer(int);
 
 private:
     void monitorSerialLine();
@@ -62,6 +65,7 @@ private:
     int prevAddress;
     int distance = -1;
     int choice = 0;
+    std::atomic<bool> monitorRunning;
 
 };
 

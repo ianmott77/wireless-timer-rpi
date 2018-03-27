@@ -20,6 +20,10 @@ int DistanceThread::getDistance(){
 
 void DistanceThread::setDistance(int distance){
     this->distance = distance;
+
+    if(this->isRunning()){
+        this->interrupt();
+    }
 }
 
 void DistanceThread::interrupt(){
@@ -43,11 +47,9 @@ void DistanceThread::run(){
     this->running = true;
     if(this->cm->connect(I2C)){
         if(this->cm->send(204)){
-            if(this->cm->connect(SERIAL)){
                 int distance = 0;
                 int set = 0;
-                for(int i = 0; this->running; i++){
-                    if(this->cm->send(1)){
+                for(int i = 0; this->isRunning(); i++){
                         Packet * p = this->cm->read();
                         if(p != 0){
                             memcpy(&distance, (int*) p->getData(), p->getSize());
@@ -56,29 +58,25 @@ void DistanceThread::run(){
                                      set = distance;
                                      emit this->updateDistance(set);
                                  }
-                                 if(distance > set + 5 || distance < set- 5){
+                                 if(distance > set + 3 || distance < set- 3){
                                         set = distance;
                                         emit this->updateDistance(set);
                                  }
                              }
-                        }
                     }
+                    QElapsedTimer timer;
+                    timer.start();
+                    int last = timer.elapsed();
+                    int now = last;
+                    while(now - last < 10)
+                        now = timer.elapsed();
                 }
-                this->distance = set;
                 if(this->cm->send(this->distance)){
                     emit this->lock();
-                    while(this->cm->getCurrentConnection()->available() > 0){
-                        Packet * p =this->cm->read();
-                        int data = 0;
-                        memcpy(&data, (int*) p->getData(), p->getSize());
-                    }
                     this->done = true;
                     this->running = false;
-                    std::cout << "finished" << std::endl << std::flush;
-                    sleep(2);
                     emit finished();
                 }
             }
-        }
     }
 }

@@ -38,25 +38,25 @@ bool Connection::send(Packet* pack){
 						return true;
 					}
 				}else{
-					std::cout << "Invalid data type" << std::endl;
+                    std::cout << "Invalid data type" << std::endl << std::flush;
 					return false;
 				}
 			}else{
 				//failed to send dataType
-				std::cout << "Failed to send position" << std::endl;
-				std::cout << "Write Error # " << errno << ":"<< strerror(errno) << std::endl;
+                std::cout << "Failed to send position" << std::endl << std::flush;
+                std::cout << "Write Error # " << errno << ":"<< strerror(errno) << std::endl<< std::flush;
 				return false;
 			}
 		}else{
 			//failed to send dataType
-			std::cout << "Failed to send data type" << std::endl;
-			std::cout << "Write Error # " << errno << ":"<< strerror(errno) << std::endl;
+            std::cout << "Failed to send data type" << std::endl << std::flush;
+            std::cout << "Write Error # " << errno << ":"<< strerror(errno) << std::endl<< std::flush;
 			return false;
 		}
 	}else{
 		//failed to send size
-		std::cout << "Failed to send size" << std::endl;
-		std::cout << "Write Error # " << errno << ":"<< strerror(errno) << std::endl;
+        std::cout << "Failed to send size" << std::endl << std::flush;
+        std::cout << "Write Error # " << errno << ":"<< strerror(errno) << std::endl<< std::flush;
 		return false;
 	}
     tcdrain(this->file);
@@ -97,13 +97,12 @@ bool Connection::send(float data){
 }
 
 int Connection::readInt(){
-	uint8_t buf[2];
-	int status = read(this->file, buf, 2);
-	if(status != 2){
-        std::cout << "Read error(" << status << ") #" << errno << " : " << strerror(errno) << std::endl;
-		return status;
+   uint8_t buf[2];
+   if(read(this->file, buf, 2) != 2){
+        std::cout << "Read error #" << errno << " : " << strerror(errno) << std::endl<< std::flush;
+        return -1;
     }
-	return buf[0] << 8 | buf[1] & 0xFF;
+    return buf[0] << 8 | buf[1];
 }
 
 long Connection::readLong(){
@@ -113,7 +112,7 @@ long Connection::readLong(){
 	}long_union;
 	
 	if(read(this->file, long_union.buf, 4) != 4){
-        std::cout << "Read error #" << errno << " : " << strerror(errno) << std::endl;
+        std::cout << "Read error #" << errno << " : " << strerror(errno) << std::endl<< std::flush;
 		return -1;
 	}
 
@@ -127,7 +126,7 @@ float Connection::readFloat(){
 	}float_union;
 	
 	if(read(this->file, float_union.buf, 4) != 4){
-        std::cout << "Read error #" << errno << " : " << strerror(errno) << std::endl;
+        std::cout << "Read error #" << errno << " : " << strerror(errno) << std::endl<< std::flush;
 		return -1;
 	}
 
@@ -139,7 +138,7 @@ std::string Connection::readString(int size){
 	for(int i = 0; i < size; i++){
 		char buf[1];
 		if(read(this->file, buf, 1) < 0){
-            std::cout << "Read error #" << errno << " : " << strerror(errno) << std::endl;
+            std::cout << "Read error #" << errno << " : " << strerror(errno) << std::endl<< std::flush;
 			return "\0";
 		}
 		if(isprint(buf[0]))
@@ -148,31 +147,3 @@ std::string Connection::readString(int size){
 	return r;
 }
 
-Packet * Connection::receive(){	
-	std::string input = "";
-	int size = this->readInt();
-    if(size > 0){
-		DataType dataType = (DataType) this->readInt();
-		int position = this->readInt();
-		if(dataType == 0){
-            int data = this->readInt();
-            return new Packet(&data, dataType, size, position);
-		}else if(dataType == 1){
-			float data = this->readLong();
-			return new Packet(&data, dataType, size, position);
-		}else if(dataType == 2){
-			signed long data = this->readLong();
-			return new Packet(&data, dataType, size, position);
-		}else if(dataType == 3){
-			unsigned long data = this->readLong();
-			return new Packet(&data, dataType, size, position);
-		}else if(dataType == 4){
-			std::string data = this->readString(size);
-			return new Packet((char*) data.c_str(), dataType, size, position);	
-		}else{
-			return 0;
-		}
-	}else{
-		return 0;
-    }
-}

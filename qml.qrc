@@ -13,5 +13,10 @@
         <file>UI/AddDevice.qml</file>
         <file>UI/Sync.qml</file>
         <file>UI/ScreenLock.qml</file>
+        <file>UI/StartKeyboard.qml</file>
+        <file>UI/StartKeyboardKey.qml</file>
+        <file>UI/StatusPage.qml</file>
+        <file>UI/SettingsPage.qml</file>
+        <file>UI/ErrorScreen.qml</file>
     </qresource>
 </RCC>

@@ -16,11 +16,11 @@ class Connection{
 		~Connection();
 		virtual bool setup() = 0;
 		virtual bool send(Packet*);
-		virtual Packet *  receive();
 		virtual ConnectionType getType() = 0;
 		virtual int readInt();
 		virtual long readLong();
 		virtual float readFloat();
+        std::string readString(int);
 		virtual void closeConnection();
 		virtual int available();
         virtual void flush();
@@ -28,7 +28,6 @@ class Connection{
 		int address;
 		std::string filename;
 	private:
-		std::string readString(int);
 		bool send(int);
 		bool send(long);
 		bool send(float);

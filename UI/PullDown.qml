@@ -24,6 +24,7 @@ Rectangle {
             id: pageMain
             height: wrapper.height - footerHeight
             width: parent.width
+            color: "transparent"
             Loader {
                 anchors.fill: parent
                 source: pullDownPage.main

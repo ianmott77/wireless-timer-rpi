@@ -20,6 +20,7 @@ class ConnectionManager{
 		bool send(float, int position = 0);
 		bool send(std::string, int position = 0);
 		Packet * read();
+        Packet *  receive();
 		void closeConnection();
 	private:
 		Connection * connections[3];

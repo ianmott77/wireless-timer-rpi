@@ -5,6 +5,7 @@
 #include <atomic>
 #include <QQuickItem>
 #include <QThread>
+#include <QElapsedTimer>
 
 class DistanceThread : public QThread
 {
@@ -15,7 +16,6 @@ class DistanceThread : public QThread
         int getDistance();
         bool isDone();
         bool isRunning();
-        void setDistance(int);
         void setRunning(bool);
         void setDone(bool);
         ConnectionManager * getManager();
@@ -29,6 +29,8 @@ class DistanceThread : public QThread
 
    public slots:
         void interrupt();
+        void setDistance(int);
+
 
     private:
         ConnectionManager * cm;

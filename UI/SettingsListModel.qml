@@ -4,11 +4,11 @@ ListModel {
     ListElement {
         setting: "Add Device"
         settingsView: "AddDevice.qml"
-        settingHeight: 350
+        settingHeight: 150
     }
     ListElement {
         setting: "Sync"
         settingsView: "Sync.qml"
-        settingHeight: 200
+        settingHeight: 50
     }
 }

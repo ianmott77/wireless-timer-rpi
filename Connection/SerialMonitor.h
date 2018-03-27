@@ -7,7 +7,7 @@
 
 class SerialMonitor{
 	public:
-		SerialMonitor(ConnectionManager *);
+        SerialMonitor(ConnectionManager *);
 		~SerialMonitor();
 		void monitor();
 		void cancel();

@@ -52,10 +52,39 @@ bool ConnectionManager::send(std::string data, int position){
 }
 
 Packet * ConnectionManager::read(){
-    return this->getCurrentConnection()->receive();
+    return this->receive();
 }
 
 void ConnectionManager::closeConnection(){
 	this->getCurrentConnection()->closeConnection();
 }
+
+Packet * ConnectionManager::receive(){
+    int size = this->getCurrentConnection()->readInt();
+    if(size > 0){
+        DataType dataType = (DataType) this->getCurrentConnection()->readInt();
+        int position = this->getCurrentConnection()->readInt();
+        if(dataType == INT){
+            int data = this->getCurrentConnection()->readInt();
+            return new Packet(&data, dataType, size, position);
+        }else if(dataType == FLOAT){
+            float data = this->getCurrentConnection()->readLong();
+            return new Packet(&data, dataType, size, position);
+        }else if(dataType == LONG){
+            signed long data = this->getCurrentConnection()->readLong();
+            return new Packet(&data, dataType, size, position);
+        }else if(dataType == ULONG){
+            unsigned long data = this->getCurrentConnection()->readLong();
+            return new Packet(&data, dataType, size, position);
+        }else if(dataType == STRING){
+            std::string data = this->getCurrentConnection()->readString(size);
+            return new Packet((char*) data.c_str(), dataType, size, position);
+        }else{
+            return 0;
+        }
+    }else{
+        return 0;
+    }
+}
+
 

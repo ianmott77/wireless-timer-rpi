@@ -16,8 +16,8 @@ Item {
                 border.width: 1
                 border.color: "#b3737171"
                 Text {
-                    font.pixelSize: 30
                     text: setting
+                    font.pixelSize: 20
                     font.weight: Font.Thin
                     fontSizeMode: Text.Fit
                     renderType: Text.NativeRendering

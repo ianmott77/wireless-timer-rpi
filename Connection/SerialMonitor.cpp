@@ -1,7 +1,7 @@
 #include "SerialMonitor.h"
 
 SerialMonitor::SerialMonitor(ConnectionManager * manager){
-	this->manager = manager;
+    this->manager = manager;
 	this->cont = true;
     this->running = true;
 }
@@ -51,7 +51,6 @@ void SerialMonitor::monitor(){
                 if(!this->sendAck()){
                     std::cout << "Failed to send ACK" << std::endl<< std::flush ;
                 }
-
             }else{
                 std::cout << "Received corrupt packet" << std::endl << std::flush;
             }
