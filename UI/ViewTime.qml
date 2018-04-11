@@ -13,15 +13,22 @@ Rectangle {
             var time = parseFloat(Controller.getCurrentTime()/1000.00).toFixed(2);
             currentTimeText.text = (time === 0) ? "DNF" : time;
             currentTimeText.color = "black"
+
         }
         onRaceMode:{
             bibNumber.text = '0';
             currentTimeText.color = "black"
             currentTimeText.text = '00:00';
+            dnfButton.enabled = true;
+            dnfWrapper.color = "red"
         }
         onDnfRacer:{
             currentTimeText.color = "red"
             currentTimeText.text = "DNF"
+        }
+        onDoneRaceMode:{
+            dnfButton.enabled = false;
+            dnfWrapper.color = "grey"
         }
     }
 
@@ -58,10 +65,11 @@ Rectangle {
         }
     }
     Rectangle{
+        id: dnfWrapper
         y: 300
         height: 50
         width: 175
-        color: "red"
+        color: "grey"
         anchors.horizontalCenterOffset: 1
         anchors.horizontalCenter: parent.horizontalCenter
         Text{
@@ -77,7 +85,9 @@ Rectangle {
             font.family: "IBM Plex Sans"
         }
         MouseArea{
+            id:dnfButton
             anchors.fill: parent
+            enabled: false
             onClicked: {
                 Arduino.dnfRacer(Controller.getCurrentBib())
             }

@@ -18,5 +18,8 @@
         <file>UI/StatusPage.qml</file>
         <file>UI/SettingsPage.qml</file>
         <file>UI/ErrorScreen.qml</file>
+        <file>UI/TimesPage.qml</file>
+        <file>UI/ModeSelectPage.qml</file>
+        <file>UI/StartLoader.qml</file>
     </qresource>
 </RCC>

@@ -11,27 +11,32 @@
 #include <math.h>
 #include "Packet.h"
 
-class Connection{
-	public:
-		~Connection();
-		virtual bool setup() = 0;
-		virtual bool send(Packet*);
-		virtual ConnectionType getType() = 0;
-		virtual int readInt();
-		virtual long readLong();
-		virtual float readFloat();
-        std::string readString(int);
-		virtual void closeConnection();
-		virtual int available();
-        virtual void flush();
-		int file;
-		int address;
-		std::string filename;
-	private:
-		bool send(int);
-		bool send(long);
-		bool send(float);
-		bool send(const char *);
+class Connection {
+public:
+
+  ~Connection();
+  virtual bool           setup() = 0;
+  virtual bool           send(Packet *);
+  bool                   send(int);
+  bool                   send(long);
+  bool send(uint32_t);
+  bool                   send(unsigned long);
+  bool                   send(float);
+  bool                   send(const char *);
+  virtual ConnectionType getType() = 0;
+  virtual int            readInt();
+  virtual long           readLong();
+  virtual unsigned long  readULong();
+  virtual float          readFloat();
+  std::string            readString(int);
+  virtual void           closeConnection();
+  virtual int            available();
+  virtual void           flush();
+  int file;
+  int address;
+  std::string filename;
+
+private:
 };
 
-#endif
+#endif // ifndef CONNECTION_H

@@ -1,127 +1,163 @@
 #include "Serial.h"
 
-Serial::Serial() : Connection(){ }
+Serial::Serial() : Connection() {}
 
-Serial::~Serial(){ }
+Serial::~Serial() {}
 
-bool
-Serial::setup()
+bool Serial::setup()
 {
-    struct termios tty;
-    struct termios tty_old;
+  struct termios tty;
+  struct termios tty_old;
 
-    bool connected = false;
+  bool connected = false;
 
-    this->filename = "/dev/serial0";
+  this->filename = "/dev/serial0";
 
-    this->file = open(this->filename.c_str(), O_RDWR | O_NOCTTY);
+  this->file = open(this->filename.c_str(), O_RDWR | O_NOCTTY);
 
-    if (this->file >= 0) {
-        connected = true;
-    }
+  if (this->file >= 0) {
+    connected = true;
+  }
 
-    if (!connected) {
-        std::cout << "Open device error:" << strerror(errno) << std::endl << std::flush;
-        return false;
-    }
+  if (!connected) {
+    std::cout << "Open device error:" << strerror(errno) << std::endl <<
+      std::flush;
+    return false;
+  }
 
-    memset(&tty, 0, sizeof tty);
+  memset(&tty, 0, sizeof tty);
 
-    if (tcgetattr(this->file, &tty) != 0) {
-        printf("tcgetattr error: %s\n", strerror(errno));
-        return false;
-    }
+  if (tcgetattr(this->file, &tty) != 0) {
+    printf("tcgetattr error: %s\n", strerror(errno));
+    return false;
+  }
 
-    tty_old = tty;
+  tty_old = tty;
 
-    cfsetospeed(&tty, (speed_t) B115200);
-    cfsetispeed(&tty, (speed_t) B115200);
-
-
-    tty.c_cflag &= ~PARENB;
-    tty.c_cflag &= ~CSTOPB;
-    tty.c_cflag &= ~CSIZE;
-    tty.c_cflag &= ~HUPCL;
-    tty.c_cflag |= CS8;
-    tty.c_cflag &= ~CRTSCTS;
-    tty.c_cflag |= (CREAD | CLOCAL);
-
-    /*
-     * non-canonical mode
-     * tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | IGNCR | INLCR| ICRNL | IXON);
-     * tty.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
-     * tty.c_oflag &= ~OPOST;
-     */
-
-    tty.c_cc[VMIN]  = 1;
-    tty.c_cc[VTIME] = 1;
-
-    cfmakeraw(&tty);
-
-    tcflush(this->file, TCIOFLUSH);
+  cfsetospeed(&tty, (speed_t)B115200);
+  cfsetispeed(&tty, (speed_t)B115200);
 
 
-    if (tcsetattr(this->file, TCSAFLUSH, &tty) != 0) {
-        printf("tcsetattr error: %s\n", strerror(errno));
-        return false;
-    }
+  tty.c_cflag &= ~PARENB;
+  tty.c_cflag &= ~CSTOPB;
+  tty.c_cflag &= ~CSIZE;
+  tty.c_cflag &= ~HUPCL;
+  tty.c_cflag |= CS8;
+  tty.c_cflag &= ~CRTSCTS;
+  tty.c_cflag |= (CREAD | CLOCAL);
 
-    return true;
+  /*
+   * non-canonical mode
+   * tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | IGNCR | INLCR| ICRNL |
+   * IXON);
+   * tty.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+   * tty.c_oflag &= ~OPOST;
+   */
+
+  tty.c_cc[VMIN]  = 1;
+  tty.c_cc[VTIME] = 1;
+
+  cfmakeraw(&tty);
+
+  tcflush(this->file, TCIOFLUSH);
+
+
+  if (tcsetattr(this->file, TCSAFLUSH, &tty) != 0) {
+    printf("tcsetattr error: %s\n", strerror(errno));
+    return false;
+  }
+
+  return true;
 } // Serial::setup
 
 ConnectionType
 Serial::getType()
 {
-    return SERIAL;
+  return SERIAL;
 }
 
-int
-Serial::readInt()
+int Serial::readInt()
 {
-    uint8_t buf[2];
+  uint8_t buf[2];
 
-    for (int i = 0; i < 2; i++) {
-        if (read(this->file, &buf[i], 1) < 0) {
-            std::cout << "Read error #" << errno << " : " << strerror(errno) << std::endl << std::flush;
-            return -1;
-        }
+  for (int i = 0; i < 2; i++) {
+    if (read(this->file, &buf[i], 1) < 0) {
+      std::cout << "Read error #" << errno << " : " << strerror(errno) <<
+        std::endl << std::flush;
+      return -1;
     }
-    int r = buf[0] << 8;
-    r |= buf[1] & 0xFF;
-    return r;
+  }
+  int r = buf[0] << 8;
+  r |= buf[1] & 0xFF;
+  return r;
 }
 
-long
-Serial::readLong()
+long Serial::readLong()
 {
-    union {
-        uint8_t buf[4];
-        long    val;
-    } long_union;
+  union {
+    uint8_t buf[4];
+    long    val;
+  } long_union;
 
-    for (int i = 0; i < 4; i++) {
-        if (read(this->file, &long_union.buf[i], 1) <= 0) {
-            std::cout << "Read error #" << errno << " : " << strerror(errno) << std::endl << std::flush;
-            return -1;
-        }
+  for (int i = 0; i < 4; i++) {
+    if (read(this->file, &long_union.buf[i], 1) <= 0) {
+      std::cout << "Read error #" << errno << " : " << strerror(errno) <<
+        std::endl << std::flush;
+      return -1;
     }
-    return long_union.val;
+  }
+  return long_union.val;
 }
 
-float
-Serial::readFloat()
+unsigned long Serial::readULong()
 {
-    union {
-        uint8_t buf[4];
-        float   val;
-    } float_union;
+  union {
+    uint8_t       buf[4];
+    unsigned long val;
+  } long_union;
 
-    for (int i = 0; i < 4; i++) {
-        if (read(this->file, &float_union.buf[i], 1) <= 0) {
-            std::cout << "Read error #" << errno << " : " << strerror(errno) << std::endl << std::flush;
-            return -1;
-        }
+  for (int i = 0; i < 4; i++) {
+    if (read(this->file, &long_union.buf[i], 1) <= 0) {
+      std::cout << "Read error #" << errno << " : " << strerror(errno) <<
+        std::endl << std::flush;
+      return -1;
     }
+  }
+  return long_union.val;
+}
 
-    return float_union.val;
+float Serial::readFloat()
+{
+  union {
+    uint8_t buf[4];
+    float   val;
+  } float_union;
+
+  for (int i = 0; i < 4; i++) {
+    if (read(this->file, &float_union.buf[i], 1) <= 0) {
+      std::cout << "Read error #" << errno << " : " << strerror(errno) <<
+        std::endl << std::flush;
+      return -1;
+    }
+  }
+
+  return float_union.val;
+}
+
+bool Serial::send(long data) {
+  union {
+    uint8_t buf[4];
+    long    val;
+  } long_union;
+
+  long_union.val = data;
+
+  std::cout << "dfadfasdfa" << std::endl << std::flush;
+
+  if (write(this->file, long_union.buf, 4) != 4) {
+    std::cout << "write error #" << errno << " : " << strerror(errno) <<
+      std::endl << std::flush;
+    return false;
+  }
+  return true;
 }

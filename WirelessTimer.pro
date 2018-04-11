@@ -26,7 +26,8 @@ SOURCES += main.cpp \
     uicontroller.cpp \
     arduino.cpp \
     device.cpp \
-    racer.cpp
+    racer.cpp \
+    runtimemanager.cpp
 
 RESOURCES += qml.qrc
 
@@ -57,4 +58,5 @@ HEADERS += \
     uicontroller.h \
     arduino.h \
     device.h \
-    racer.h
+    racer.h \
+    runtimemanager.h
