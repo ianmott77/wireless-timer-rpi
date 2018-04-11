@@ -15,22 +15,18 @@ ApplicationWindow {
         id: mainWrapper
         anchors.fill: parent
 
-        UI.PullDown {
-            wrapper: mainWrapper
-            dragMargin: 50
-            footerHeight: 50
-            main: "Settings.qml"
-            footer: "SettingsMenuFooter.qml"
-            visible: (Arduino.getType() === 3) ? true : false
-            color: "transparent"
+        UI.StatusBar {
+            id: statusBar
+            y: 0
+            height: 32.5
         }
 
         Rectangle {
             id: mainWindowFill
             x: 0
-            y: (Arduino.getType() === 3) ? 50 : 0
+            y: (Arduino.getType() === 3) ? 50 : statusBar.height
             height: (Arduino.getType(
-                         ) === 3) ? parent.height - 100 : parent.height
+                         ) === 3) ? parent.height - 100 : parent.height - statusBar.height
             width: parent.width
             SwipeView {
                 id: mainSwipeView
@@ -92,7 +88,7 @@ ApplicationWindow {
 
             PageIndicator {
                 id: mainSwipeViewIndicator
-                y: 562
+                y: 575
                 anchors.horizontalCenterOffset: 0
                 count: mainSwipeView.count
                 currentIndex: mainSwipeView.currentIndex

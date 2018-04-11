@@ -8,6 +8,7 @@
 #include <QElapsedTimer>
 #include "arduino.h"
 #include "runtimemanager.h"
+#include "batterymonitor.h"
 
 class UIController : public QObject {
   Q_OBJECT
@@ -36,6 +37,8 @@ signals:
   void errorSignal(int error);
   void dnfRacer(int racer);
   void doneRaceMode();
+  void batteryStatusChanged(float   level,
+                            QString source);
 
 public slots:
 
@@ -63,6 +66,8 @@ public slots:
   Racer     * getLastRacer();
   void        error(int error);
   QVariantMap getRacerJSON();
+  void        batteryStatusUpdate(float   level,
+                                  QString source);
 
 private:
 
@@ -78,6 +83,7 @@ private:
   QObject *qml = 0;
   QString loadingMsg;
   std::atomic<bool>uiCounter;
+  BatteryMonitor *battery;
 };
 
 #endif // UICONTROLLER_H

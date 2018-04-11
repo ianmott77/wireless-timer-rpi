@@ -21,5 +21,7 @@
         <file>UI/TimesPage.qml</file>
         <file>UI/ModeSelectPage.qml</file>
         <file>UI/StartLoader.qml</file>
+        <file>UI/Battery.qml</file>
+        <file>UI/StatusBar.qml</file>
     </qresource>
 </RCC>

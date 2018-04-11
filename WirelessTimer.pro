@@ -27,7 +27,8 @@ SOURCES += main.cpp \
     arduino.cpp \
     device.cpp \
     racer.cpp \
-    runtimemanager.cpp
+    runtimemanager.cpp \
+    batterymonitor.cpp
 
 RESOURCES += qml.qrc
 
@@ -59,4 +60,5 @@ HEADERS += \
     arduino.h \
     device.h \
     racer.h \
-    runtimemanager.h
+    runtimemanager.h \
+    batterymonitor.h

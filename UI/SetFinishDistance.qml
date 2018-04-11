@@ -4,7 +4,7 @@ Item {
     id: finishDistanceWindow
     property var distance :  0
     width: 238
-    height: 402
+    height: 362
     Connections {
         target: Controller
         onDistanceChanged: {
@@ -14,8 +14,8 @@ Item {
 
     Item {
         id: startButtonWrapper
-        x: 30
-        y: 325
+        x: 31
+        y: 257
         visible: true
         width: 175
         height: 50
@@ -49,7 +49,7 @@ Item {
 
     Text {
         id: finishDistance
-        y: 145
+        y: 86
         width: 175
         height: 80
         text: distance
@@ -66,11 +66,11 @@ Item {
     Item {
         id: cancelWrapper
         anchors.horizontalCenter: parent.horizontalCenter
-        y: 235
+        y: 187
         visible: false
         width: 175
         height: 50
-        anchors.horizontalCenterOffset: 0
+        anchors.horizontalCenterOffset: 2
         Rectangle {
             anchors.fill: parent
             color: "red"
@@ -106,7 +106,7 @@ Item {
     Item {
         id: setDistanceWrapper
         anchors.horizontalCenter: parent.horizontalCenter
-        y: 325
+        y: 257
         visible: false
         width: 176
         height: 50
@@ -147,10 +147,11 @@ Item {
     Text {
         id: setDistanceTitle
         x: 271
-        y: 37
+        y: 15
         width: 224
         height: 55
         text: qsTr("Set Finish")
+        anchors.horizontalCenterOffset: 1
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         font.underline: true

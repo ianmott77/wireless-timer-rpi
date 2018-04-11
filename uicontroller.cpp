@@ -10,6 +10,7 @@ UIController::UIController(Arduino               *arduino,
   this->manager  = this->arduino->getManager();
   this->engine   = engine;
   this->rtm      = new RunTimeManager();
+  this->battery  = new BatteryMonitor();
   QObject::connect(this->arduino, SIGNAL(signalChoice(int)), this,
                    SLOT(choiceDispatch(int)));
   QObject::connect(this->arduino->dist, SIGNAL(updateDistance(int)), this,
@@ -24,6 +25,10 @@ UIController::UIController(Arduino               *arduino,
                    SLOT(updateInfo()));
   QObject::connect(this->arduino, SIGNAL(error(int)), this,
                    SLOT(error(int)));
+  QObject::connect(this->battery,
+                   SIGNAL(updatePowerStatus(float,QString)),
+                   this,
+                   SIGNAL(batteryStatusChanged(float,QString)));
   this->qml = qml;
   this->startSerialLine();
 }
@@ -190,7 +195,10 @@ void UIController::goRaceMode() {
         last = timer.elapsed();
       }
 
-      if (((this->getLastRacer()->getRaceMode() == 2) && (this->getLastRacer()->getTime() > this->arduino->getPace() + 10000)) && this->arduino->isPaceSet()) {
+      if (((this->getLastRacer()->getRaceMode() == 2) &&
+           (this->getLastRacer()->getTime() >
+            this->arduino->getPace() + 10000)) &&
+          this->arduino->isPaceSet()) {
         std::cout << "Time is now outside the pace: "  << this->getLastRacer()->getTime()  << std::endl << std::flush;
         this->arduino->dnfRacer(this->getLastRacer()->getBib());
       }
@@ -231,15 +239,18 @@ void UIController::goRaceMode() {
 
           std::cout << "Race Mode: " << this->getLastRacer()->getRaceMode()  << std::endl << std::flush;
 
-          if ((this->getLastRacer()->getRaceMode() == 2) && (this->currentTime > 0) && this->arduino->isPaceSet()) {
-            if (this->getLastRacer()->getTime()  <  this->arduino->getPace() - 10000) {
+          if ((this->getLastRacer()->getRaceMode() == 2) &&
+              (this->currentTime > 0) && this->arduino->isPaceSet()) {
+            if (this->getLastRacer()->getTime()  <
+                this->arduino->getPace() - 10000) {
               withinPace = false;
             }
           }
 
           Racer *finisher = 0;
 
-          if (!withinPace && (this->getLastRacer()->getRaceMode() == 2) && this->arduino->isPaceSet()) this->currentTime = 1;
+          if (!withinPace && (this->getLastRacer()->getRaceMode() == 2) &&
+              this->arduino->isPaceSet()) this->currentTime = 1;
 
           std::cout << "in pace?:" << withinPace << std::endl << std::flush;
 
@@ -253,7 +264,8 @@ void UIController::goRaceMode() {
                 std::cout << "pace time: " << pace << std::endl << std::flush;
 
                 if (this->manager->connect(SERIAL)) {
-                  if (!this->manager->send(pace)) {
+                  if (!this->manager->send(
+                        pace)) {
                     std::cout << "Failed to send pace time" << std::endl << std::flush;
                   }
                   this->arduino->setPace(pace);
@@ -262,7 +274,8 @@ void UIController::goRaceMode() {
                 }
               }
 
-              emit this->racerOnCourse(this->currentTime);
+              emit this->racerOnCourse(
+                this->currentTime);
               double t = (this->currentTime == 0) ? 0 : this->currentTime / 1000.00;
               this->rtm->addTime(finisher);
 
@@ -358,4 +371,8 @@ void UIController::setQML(QObject *qml) {
 void UIController::updateInfo() {
   this->arduino->getInfo();
   emit this->infoChanged();
+}
+
+void UIController::batteryStatusUpdate(float level,  QString source) {
+  emit this->batteryStatusChanged(level, source);
 }
