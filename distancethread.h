@@ -7,39 +7,42 @@
 #include <QThread>
 #include <QElapsedTimer>
 
-class DistanceThread : public QThread
-{
-    Q_OBJECT
-    Q_PROPERTY(int distance READ getDistance WRITE setDistance NOTIFY updateDistance)
-    public:
-        DistanceThread(ConnectionManager *);
-        int getDistance();
-        bool isDone();
-        bool isRunning();
-        void setRunning(bool);
-        void setDone(bool);
-        ConnectionManager * getManager();
+class DistanceThread : public QThread {
+  Q_OBJECT
+  Q_PROPERTY(int distance READ getDistance WRITE setDistance NOTIFY updateDistance)
 
+public:
 
-   signals:
-        void started();
-        void updateDistance(int);
-        void lock();
-        void finished();
+  DistanceThread(ConnectionManager *);
+  int                getDistance();
+  bool               isDone();
+  bool               isRunning();
+  void               setRunning(bool);
+  void               setDone(bool);
+  ConnectionManager* getManager();
 
-   public slots:
-        void interrupt();
-        void setDistance(int);
+signals:
 
+  void started();
+  void updateDistance(int);
+  void lock();
+  void finished();
 
-    private:
-        ConnectionManager * cm;
-       std::atomic <bool> running;
-       std::atomic <bool> done;
-        int distance = 0;
+public slots:
 
-    protected:
-        void run();
+  void interrupt();
+  void setDistance(int);
+
+private:
+
+  ConnectionManager *cm;
+  std::atomic<bool>running;
+  std::atomic<bool>done;
+  int distance = 1;
+
+protected:
+
+  void run();
 };
 
 #endif // DISTANCETHREAD_H

@@ -26,7 +26,13 @@ BatteryMonitor::BatteryMonitor()
 }
 
 bool BatteryMonitor::readBatteryStatus() {
-  if (this->batteryStatus->open(QIODevice::ReadOnly)) {
+  if (!this->batteryStatus->isOpen()) {
+    if (!this->batteryStatus->open(QIODevice::ReadOnly)) {
+      return false;
+    }
+  }
+
+  if (this->batteryStatus->isOpen()) {
     QByteArray data = this->batteryStatus->readAll();
     QString    stats(data);
     this->rawData = new QStringList(stats.split(","));
@@ -38,11 +44,11 @@ bool BatteryMonitor::readBatteryStatus() {
     } else {
       return false;
     }
-
     this->batteryStatus->close();
     return true;
+  } else {
+    return false;
   }
-  return false;
 }
 
 QString BatteryMonitor::getPowerSource()       {

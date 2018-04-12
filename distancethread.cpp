@@ -52,30 +52,34 @@ void DistanceThread::run() {
       int distance = 0;
       int set      = 0;
 
-      for (int i = 0; this->isRunning(); i++) {
-        Packet *p = this->cm->read();
+      if (this->cm->connect(SERIAL)) {
+        for (int i = 0; this->isRunning(); i++) {
+          Packet *p = this->cm->read();
 
-        if (p != 0) {
-          memcpy(&distance, (int *)p->getData(), p->getSize());
+          if (p != 0) {
+            memcpy(&distance, (int *)p->getData(), p->getSize());
 
-          if (distance >= 0) {
-            if (i == 0) {
-              set = distance;
-              emit this->updateDistance(set);
-            }
+            if (distance >= 0) {
+              if (i == 0) {
+                set = distance;
+                emit this->updateDistance(set);
+              }
 
-            if ((distance > set + 3) || (distance < set - 3)) {
-              set = distance;
-              emit this->updateDistance(set);
+              if ((distance > set + 3) || (distance < set - 3)) {
+                set = distance;
+                emit this->updateDistance(set);
+              }
             }
           }
-        }
-        QElapsedTimer timer;
-        timer.start();
-        int last = timer.elapsed();
-        int now  = last;
+          QElapsedTimer timer;
+          timer.start();
+          int last = timer.elapsed();
+          int now  = last;
 
-        while (now - last < 20) now = timer.elapsed();
+          while (now - last < 20) now = timer.elapsed();
+
+          if (this->cm->send(0)) {}
+        }
       }
 
       if (this->cm->send(this->distance)) {

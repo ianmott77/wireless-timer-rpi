@@ -10,7 +10,14 @@ UIController::UIController(Arduino               *arduino,
   this->manager  = this->arduino->getManager();
   this->engine   = engine;
   this->rtm      = new RunTimeManager();
-  this->battery  = new BatteryMonitor();
+
+  if (this->arduino->getType() == 2) {
+    this->battery = new BatteryMonitor();
+    QObject::connect(this->battery,
+                     SIGNAL(updatePowerStatus(float,QString)),
+                     this,
+                     SIGNAL(batteryStatusChanged(float,QString)));
+  }
   QObject::connect(this->arduino, SIGNAL(signalChoice(int)), this,
                    SLOT(choiceDispatch(int)));
   QObject::connect(this->arduino->dist, SIGNAL(updateDistance(int)), this,
@@ -25,10 +32,7 @@ UIController::UIController(Arduino               *arduino,
                    SLOT(updateInfo()));
   QObject::connect(this->arduino, SIGNAL(error(int)), this,
                    SLOT(error(int)));
-  QObject::connect(this->battery,
-                   SIGNAL(updatePowerStatus(float,QString)),
-                   this,
-                   SIGNAL(batteryStatusChanged(float,QString)));
+
   this->qml = qml;
   this->startSerialLine();
 }
@@ -195,12 +199,13 @@ void UIController::goRaceMode() {
         last = timer.elapsed();
       }
 
-      if (((this->getLastRacer()->getRaceMode() == 2) &&
-           (this->getLastRacer()->getTime() >
-            this->arduino->getPace() + 10000)) &&
+      if (withinPace && ((this->getLastRacer()->getRaceMode() == 2) &&
+                         (this->getLastRacer()->getTime() >
+                          this->arduino->getPace() + 10000)) &&
           this->arduino->isPaceSet()) {
-        std::cout << "Time is now outside the pace: "  << this->getLastRacer()->getTime()  << std::endl << std::flush;
+        withinPace = false;
         this->arduino->dnfRacer(this->getLastRacer()->getBib());
+        std::cout << "Time is now outside the pace: "  << this->getLastRacer()->getTime()  << std::endl << std::flush;
       }
 
       // check if we received a signal from the arduino either to add a new
@@ -251,8 +256,8 @@ void UIController::goRaceMode() {
 
           if (!withinPace && (this->getLastRacer()->getRaceMode() == 2) &&
               this->arduino->isPaceSet()) this->currentTime = 1;
-
-          std::cout << "in pace?:" << withinPace << std::endl << std::flush;
+          std::string yn =  (withinPace) ? "Yes" : "No";
+          std::cout << "Is within pace time: " << yn << std::endl << std::flush;
 
           if (this->manager->send((uint32_t)this->currentTime)) {
             if (withinPace || (this->getLastRacer()->getRaceMode() != 2)) {

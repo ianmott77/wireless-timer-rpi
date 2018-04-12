@@ -403,17 +403,7 @@ void Arduino::startRacer(int bib) {
 }
 
 void Arduino::dnfRacer(int racer) {
-  this->monitor->cancel();
-
-  if (this->manager->connect(I2C)) {
-    if (this->manager->send(0)) {
-      if (this->manager->connect(SERIAL)) {
-        if (this->manager->send(racer)) {
-          this->intervalSignal = true;
-        }
-      }
-    }
-  }
+  if (this->manager->send(10)) {}
 }
 
 bool Arduino::getIntervalStatus() {
