@@ -1,6 +1,6 @@
 QT += quick
+QT += sql
 CONFIG += c++11
-
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -28,7 +28,8 @@ SOURCES += main.cpp \
     device.cpp \
     racer.cpp \
     runtimemanager.cpp \
-    batterymonitor.cpp
+    batterymonitor.cpp \
+    databasecontroller.cpp
 
 RESOURCES += qml.qrc
 
@@ -43,7 +44,8 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /home/pi/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-DISTFILES +=
+DISTFILES += \
+    wireless_timing_db
 
 HEADERS += \
     Connection/Connection.h \
@@ -61,4 +63,5 @@ HEADERS += \
     device.h \
     racer.h \
     runtimemanager.h \
-    batterymonitor.h
+    batterymonitor.h \
+    databasecontroller.h

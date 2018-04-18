@@ -24,6 +24,7 @@ signals:
   void signalChoice(int);
   void readyToUpdate();
   void error(int);
+  void syncDone();
 
 public slots:
 

@@ -43,7 +43,7 @@ ApplicationWindow {
                 Repeater {
                     function getNumPages() {
                         if (mainWindow.type === 1) {
-                            return 3
+                            return 4
                         } else if (mainWindow.type === 2) {
                             return 4
                         } else {
@@ -53,16 +53,20 @@ ApplicationWindow {
                     model: getNumPages()
 
                     Loader {
+
                         active: SwipeView.isCurrentItem || SwipeView.isNextItem
-                                || SwipeView.isPreviousItem
+                                || SwipeView.isPreviousItem || SwipeView.isNextItem + 1 || SwipeView.isPreviousItem - 1
                         sourceComponent: Loader {
                             function getSource(index) {
                                 if (mainWindow.type == 1) {
-                                    if (index === 0) {
+                                    mainSwipeView.currentIndex = 1
+                                    if(index === 0){
+                                        return "UI/OptionsPage.qml"
+                                    }else if (index === 1) {
                                         return "UI/StartLoader.qml"
-                                    } else if (index === 1) {
-                                        return "UI/StatusPage.qml"
                                     } else if (index === 2) {
+                                        return "UI/StatusPage.qml"
+                                    } else if (index === 3) {
                                         return "UI/SettingsPage.qml"
                                     }
                                 } else if (mainWindow.type == 2) {
@@ -146,6 +150,8 @@ ApplicationWindow {
             msg = "There was an error receiving a packet"
         } else if (err === 205) {
             msg = "Invalid position to add to the network"
+        }else if(err === 300){
+            msg = "Clearing the runs database failed!"
         }
 
         errScr.setMsg(msg)

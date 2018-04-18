@@ -3,75 +3,141 @@ import QtQuick.Layouts 1.3
 import QtQuick.Controls 2.2
 
 Rectangle {
-    property var racers: Controller.getRacerJSON()
+    id: timeWrapper
     anchors.fill: parent
-
-    function countRuns() {
-        var i = 0
-        for (var bib in racers) {
-            i++
-        }
-        return i
-    }
-
-    function getKeyAt(index) {
-        var i = 0
-        for (var bib in racers) {
-            if (i === index)
-                return bib
-            i++
-        }
-    }
-
-    function getTimeFor(key) {
-        return (racers[key]["finish-time"] !== 0) ? racers[key]["finish-time"] - racers[key]["start-time"] : 0;
-    }
-
-    ScrollView {
+    property var racers: []
+    ColumnLayout {
         anchors.fill: parent
-        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-        ScrollBar.horizontal.interactive: false
-        clip: true
-        ColumnLayout {
-            spacing: 5
-            Repeater {
-                model: countRuns()
+        spacing: 0
+        Rectangle {
+            id: runControlBar
+            Layout.fillWidth: true
+            height: 50
+            color: "black"
+            RowLayout {
+                spacing: 0
+                anchors.fill: parent
                 Rectangle {
-                    property var bib: getKeyAt(index)
+                    color: "white"
                     Layout.fillWidth: true
-                    height: 45
-                    RowLayout {
+                    height: 35
+                    Text {
                         anchors.fill: parent
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        spacing: 40
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            Text {
-                                text: bib
-                                fontSizeMode: Text.Fit
-                                verticalAlignment: Text.AlignVCenter
-                                horizontalAlignment: Text.AlignHCenter
-                                font.family: "IBM Plex Sans"
-                            }
+                        text: " Clear All"
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        font.family: "IBM Plex Sans"
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            Controller.clearAllRuns()
                         }
+                    }
+                }
+                Rectangle {
+                    color: "black"
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    RowLayout {
+                        spacing: 5
+                        Text {
+                            color: "white"
+                            Layout.fillHeight: true
+                            text: "Sort By"
+                            fontSizeMode: Text.Fit
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignHCenter
+                            font.family: "IBM Plex Sans"
+                        }
+                        ComboBox {
+                            font.family: "IBM Plex Sans"
+                            font.pointSize: 10
+                            width: 30
+                            Layout.fillHeight: true
+                            model: ["Time", "Bib"]
+                        }
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            height: 25
+            color: "#b3615050"
+            id: tableHeader
+            RowLayout {
+                anchors.fill: parent
+                spacing: 0
+                Text {
+                    text: "Bib #"
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    fontSizeMode: Text.Fit
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    font.family: "IBM Plex Sans"
+                }
+                Text {
+                    text: "Time"
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    fontSizeMode: Text.Fit
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    font.family: "IBM Plex Sans"
+                }
+            }
+        }
+
+        Rectangle {
+            id: scrollWrapper
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            y: 10
+            ScrollView {
+                id: timesScroll
+                anchors.fill: parent
+                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                ScrollBar.horizontal.interactive: false
+                clip: true
+                ColumnLayout {
+                    id: timeView
+                    spacing: 5
+                    Repeater {
+                        model: Controller.getNumRacers()
                         Rectangle {
                             Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            Text {
-                                property var time: (getTimeFor(bib) === 0) ? "DNF" : parseFloat( getTimeFor(bib) / 1000.00).toFixed(2)
-                                text: time
-                                verticalAlignment: Text.AlignVCenter
-                                horizontalAlignment: Text.AlignHCenter
-                                fontSizeMode: Text.Fit
-                                color: (time === "DNF") ? "red" : "black"
-                                font.family: "IBM Plex Sans"
+                            height: 45
+                            TimeEntry {
+                                width: timesScroll.width
+                                racer: Controller.racerAtToJson(index)
                             }
                         }
                     }
                 }
             }
+        }
+    }
+    Connections {
+        target: Controller
+        onNewRacerOnCourse: {
+            timeWrapper.racers[bib] = Qt.createComponent(
+                        "TimeEntry.qml").createObject(timeView, {
+                                                          width: timeWrapper.width,
+                                                          height: 35,
+                                                          x: 20,
+                                                          racer: {
+                                                              bib: bib,
+                                                              start_time: 0,
+                                                              finish_time: time
+                                                          }
+                                                      })
+        }
+        onFinished: {
+            timeWrapper.racers[bib]["racer"]["start_time"] = startTime
+            timeWrapper.racers[bib]["racer"]["finish_time"] = time
         }
     }
 }

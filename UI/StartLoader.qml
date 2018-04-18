@@ -1,12 +1,20 @@
 import QtQuick 2.0
 
 Rectangle {
+    property var l: pageLoader
     id: parentLoader
     width: 238
     height: 402
-
+    function load() {
+        if (Arduino.getRaceType() === 1 || Arduino.getRaceType() === 2) {
+            pageLoader.sourceComponent = parentLoader.start
+        } else {
+            pageLoader.sourceComponent = parentLoader.ms
+        }
+    }
     property var start: Component {
-        Start {}
+        Start {
+        }
     }
 
     property var ms: Component {
@@ -15,16 +23,8 @@ Rectangle {
         }
     }
 
-    function load() {
-        if (Arduino.getRaceType() === 1 || Arduino.getRaceType() === 2) {
-            return start
-        } else {
-            return ms
-        }
-    }
-
     Loader {
-       id:pageLoader
+        id: pageLoader
         anchors.fill: parent
         sourceComponent: load()
     }

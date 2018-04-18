@@ -88,7 +88,7 @@ Rectangle {
         id: startKeyboard
         height: 320
         w: parent.width - 10
-        h: ((parent.height / 4) * 3) - 45
+        h: parent.height - 182.5
         textIn: bibNum
         numColor: "#9E9E9E"
         clrColor: "#666666"

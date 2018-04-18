@@ -3,6 +3,7 @@
 
 #include "Connection/ConnectionManager.h"
 #include "racer.h"
+#include "databasecontroller.h"
 #include <QFile>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -14,19 +15,15 @@ public:
 
   RunTimeManager();
   ~RunTimeManager();
-  QJsonDocument     * getJsonDoc();
-  QJsonObject         toJson();
-  void                addTime(Racer *);
-  bool                writeFile();
-  QMap<int, Racer *>* getRacerMap();
+  QJsonObject     toJson(const QString&);
+  bool            addRun(Racer *);
+  QVector<Racer *>getRacers();
+  bool            clearAllRuns();
 
 private:
 
-  QJsonDocument *jsonDoc;
-  QFile *jsonFile;
-  QByteArray rawFile;
-  QJsonObject jsonObj;
-  QMap<int, Racer *> *racerMap;
+  DatabaseController *database;
+  QVector<Racer *>racers;
 };
 
 #endif // RUNTIMEMANAGER_H

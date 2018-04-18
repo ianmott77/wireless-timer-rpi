@@ -6,6 +6,8 @@
 #include <QQmlApplicationEngine>
 #include <QQmlComponent>
 #include <QElapsedTimer>
+#include <QVector>
+
 #include "arduino.h"
 #include "runtimemanager.h"
 #include "batterymonitor.h"
@@ -33,7 +35,16 @@ signals:
   void lock();
   void unlock();
   void raceMode();
-  void racerOnCourse(int);
+  void racerOnCourse(int bib,
+                     int time);
+  void nextToFinish(int bib,
+                    int time);
+  void finished(int bib,
+                int startTime,
+                int time);
+  void newRacerOnCourse(int bib,
+                        int startTime,
+                        int time);
   void errorSignal(int error);
   void dnfRacer(int racer);
   void doneRaceMode();
@@ -42,32 +53,37 @@ signals:
 
 public slots:
 
-  void        setFinishDistance(int distance);
-  int         getFinishDistance();
-  void        startDistanceMeasurement();
-  void        updateDistance(int);
-  int         getDistance();
-  void        setDistance(int);
-  bool        addDevice(int,
-                        int);
-  void        startSerialLine();
-  void        stopSerialLine();
-  void        choiceDispatch(int);
-  void        updateInfo();
-  QString     getLoadingMsg();
+  void            setFinishDistance(int distance);
+  int             getFinishDistance();
+  void            startDistanceMeasurement();
+  void            updateDistance(int);
+  int             getDistance();
+  void            setDistance(int);
+  bool            addDevice(int,
+                            int);
+  void            startSerialLine();
+  void            stopSerialLine();
+  void            choiceDispatch(int);
+  void            updateInfo();
+  QString         getLoadingMsg();
   void setLoadingMsg(QString);
-  void        stop(QString reason = "");
-  void        start();
-  void        startRacer(int);
-  int         getCurrentTime();
-  int         getCurrentBib();
-  void        setCurrentBib(int);
-  void        goRaceMode();
-  Racer     * getLastRacer();
-  void        error(int error);
-  QVariantMap getRacerJSON();
-  void        batteryStatusUpdate(float   level,
-                                  QString source);
+  void            stop(QString reason = "");
+  void            start();
+  void            startRacer(int);
+  int             getCurrentTime();
+  int             getCurrentBib();
+  void            setCurrentBib(int);
+  void            goRaceMode();
+  Racer         * getLastRacer();
+  void            error(int error);
+  QVector<Racer *>getRacers();
+  int             getNumRacers();
+  QJsonObject     racerAtToJson(int);
+  void            batteryStatusUpdate(float   level,
+                                      QString source);
+  bool            synchronize();
+
+  bool            clearAllRuns();
 
 private:
 

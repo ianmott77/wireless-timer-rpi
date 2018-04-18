@@ -128,30 +128,38 @@ void UIController::choiceDispatch(int choice) {
       }
     });
   } else if (choice == 2) {
-    emit busy(QString("Synchronizing"));
-    std::thread *thr = new std::thread([this] {
-      Packet *p = 0;
-
-      if (this->manager->connect(SERIAL)) {
-        std::cout << "Synchronizing" << std::flush;
-
-        for (int i = 0; this->manager->getCurrentConnection()->available() <= 0;
-             i++) {
-          if (i % 100000 == 0) std::cout << "." << std::flush;
-        }
-        int done = 0;
-        p = this->manager->read();
-        memcpy(&done, (int *)p->getData(),
-               p->getSize());
-        std::cout << std::endl << "Sync Complete! - " << done << std::endl << std::flush;
-        emit free();
-      }
-    });
+    this->synchronize();
   } else if (choice == 4) {
     emit this->raceMode();
     this->goRaceMode();
   }
 } // UIController::choiceDispatch
+
+bool UIController::synchronize() {
+  emit busy(QString("Synchronizing"));
+
+  std::thread *thr = new std::thread([this] {
+    Packet *p = 0;
+
+    if (this->manager->connect(SERIAL)) {
+      std::cout << "Synchronizing" << std::flush;
+
+      for (int i = 0; this->manager->getCurrentConnection()->available() <= 0;
+           i++) {
+        if (i % 100000 == 0) std::cout << "." << std::flush;
+      }
+      int done = 0;
+      p = this->manager->read();
+      memcpy(&done, (int *)p->getData(),
+             p->getSize());
+
+      if (done == 5) {
+        emit this->arduino->syncDone();
+      }
+      emit free();
+    }
+  });
+}
 
 Racer * UIController::getLastRacer() {
   return this->arduino->getTimeQueue()->head();
@@ -170,6 +178,8 @@ void UIController::goRaceMode() {
     std::cout << "Bib #: " << r->getBib() << std::endl << "Start ms: " << r->getStartTime() << std::endl << "Current Time: " << r->getStartDelay() << std::endl << std::flush;
     std::thread *thra =
       new std::thread(&Arduino::receiveIntervalSignal, this->arduino);
+    emit this->newRacerOnCourse(r->getBib(), r->getStartTime(), r->getTime());
+
 
     // this is the ui timer
     QElapsedTimer timer;
@@ -194,8 +204,14 @@ void UIController::goRaceMode() {
 
       // we need to allow a small amount of time for the PC to update otherwise
       // it glitches
-      if (now - last > 20) {
-        emit this->racerOnCourse(this->getCurrentTime());
+      if (now - last > 50) {
+        emit this->nextToFinish(this->getLastRacer()->getBib(), this->getLastRacer()->getTime());
+
+        for (int i = 0; i < this->arduino->getTimeQueue()->size(); i++) {
+          Racer *r =  this->arduino->getTimeQueue()->at(i);
+          emit this->racerOnCourse(r->getBib(), r->getTime());
+        }
+
         last = timer.elapsed();
       }
 
@@ -279,12 +295,11 @@ void UIController::goRaceMode() {
                 }
               }
 
-              emit this->racerOnCourse(
-                this->currentTime);
-              double t = (this->currentTime == 0) ? 0 : this->currentTime / 1000.00;
-              this->rtm->addTime(finisher);
+              emit this->finished(finisher->getBib(), finisher->getStartTime(), finisher->getFinishTime());
 
-              if (this->rtm->writeFile()) {
+              double t = (this->currentTime == 0) ? 0 : this->currentTime / 1000.00;
+
+              if (this->rtm->addRun(finisher)) {
                 std::cout << "Time saved!" << std::endl << std::flush;
               }
 
@@ -292,12 +307,14 @@ void UIController::goRaceMode() {
 
               std::cout << "Bib #: " << finisher->getBib() << std::endl << "Start ms: " << finisher->getStartTime() << std::endl << "Time ms: " << this->currentTime << std::endl << "Time: " << t << std::endl << std::flush;
               std::cout << "Racer Count: " << racerCount << std::endl;
+              withinPace = true;
             }
           }
         } else if (option == 4) { // a new racer is on the track
           std::cout << "Run Started" << std::endl << std::flush;
           Racer *starter = this->arduino->getRacerInfo();
           std::cout << "Bib #: " << starter->getBib() << std::endl << "Start ms: " << starter->getStartTime() << std::endl << "Current Time: " << starter->getTime() << std::endl << std::flush;
+          emit this->newRacerOnCourse(starter->getBib(), starter->getStartTime(), starter->getTime());
         }
 
         this->arduino->setIntervalStatus(false);
@@ -365,8 +382,23 @@ void UIController::setDistance(int distance) {
   this->arduino->setDistance(distance);
 }
 
-QVariantMap UIController::getRacerJSON() {
-  return this->rtm->toJson().toVariantMap();
+QVector<Racer *>UIController::getRacers() {
+  return this->rtm->getRacers();
+}
+
+int UIController::getNumRacers() {
+  return this->rtm->getRacers().size();
+}
+
+QJsonObject UIController::racerAtToJson(int index) {
+  QJsonObject result;
+
+  Racer *r = this->rtm->getRacers().at(index);
+
+  result.insert("bib",         r->getBib());
+  result.insert("start_time",  (int)r->getStartTime());
+  result.insert("finish_time", r->getFinishTime());
+  return result;
 }
 
 void UIController::setQML(QObject *qml) {
@@ -380,4 +412,8 @@ void UIController::updateInfo() {
 
 void UIController::batteryStatusUpdate(float level,  QString source) {
   emit this->batteryStatusChanged(level, source);
+}
+
+bool UIController::clearAllRuns() {
+  return this->rtm->clearAllRuns();
 }

@@ -8,13 +8,19 @@ Rectangle {
    anchors.fill: parent
     Connections{
         target: Controller
-        onRacerOnCourse:{
-            bibNumber.text =Controller.getCurrentBib();
-            var time = parseFloat(Controller.getCurrentTime()/1000.00).toFixed(2);
-            currentTimeText.text = (time === 0) ? "DNF" : time;
+        onNextToFinish:{
+            bibNumber.text =bib
+            var t = parseFloat(time/1000.00).toFixed(2);
+            currentTimeText.text = (t === 0) ? "DNF" : t;
             currentTimeText.color = "black"
-
         }
+        onFinished: {
+            bibNumber.text =bib
+            var t = parseFloat((time- startTime)/1000.00).toFixed(2);
+            currentTimeText.text = (t === 0) ? "DNF" : t;
+            currentTimeText.color = "green"
+        }
+
         onRaceMode:{
             bibNumber.text = '0';
             currentTimeText.color = "black"

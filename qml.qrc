@@ -23,5 +23,7 @@
         <file>UI/StartLoader.qml</file>
         <file>UI/Battery.qml</file>
         <file>UI/StatusBar.qml</file>
+        <file>UI/OptionsPage.qml</file>
+        <file>UI/TimeEntry.qml</file>
     </qresource>
 </RCC>

@@ -100,6 +100,7 @@ void Arduino::sync() {
         Packet *p    = this->manager->read();
         int     done = 0;
         memcpy(&done, (int *)p->getData(), p->getSize());
+        emit this->syncDone();
       }
     }
   }
